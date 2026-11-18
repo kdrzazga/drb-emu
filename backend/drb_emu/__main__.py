@@ -1,0 +1,16 @@
+import os
+from pathlib import Path
+
+import uvicorn
+
+from drb_emu.api import create_app
+
+
+def main():
+    lake_root = Path(os.environ.get("DRB_EMU_LAKE", "lake"))
+    port = int(os.environ.get("DRB_EMU_PORT", "8000"))
+    uvicorn.run(create_app(lake_root), host="127.0.0.1", port=port)
+
+
+if __name__ == "__main__":
+    main()

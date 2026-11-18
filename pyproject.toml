@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drb-emu"
+version = "0.1.0"
+description = "Local emulation of a Databricks workspace: Unity Catalog, Delta lake, SQL, Spark API, dashboards"
+requires-python = ">=3.14"
+dependencies = [
+    "duckdb>=1.5",
+    "deltalake[pyarrow]>=1.1",
+    "pyarrow>=22",
+    "fastapi>=0.120",
+    "uvicorn>=0.38",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4",
+    "httpx>=0.28",
+]
+
+[project.scripts]
+drb-emu = "drb_emu.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+addopts = "--import-mode=importlib"
