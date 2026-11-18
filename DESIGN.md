@@ -109,7 +109,11 @@ drb-emu/
    - `INSERT` runs against an empty DuckDB scratch copy of the target and appends; `UPDATE`/`DELETE`/`MERGE` run against a full scratch copy and overwrite the Delta table. Each commit is tagged `drb.operation` so `DESCRIBE HISTORY` shows `UPDATE`, `DELETE`, `MERGE`.
    - `UPDATE SET *` / `INSERT *` in `MERGE` are expanded by column name before DuckDB sees them.
    - Not yet: `ALTER TABLE`, `SHOW VIEWS`, `information_schema`, column comments, `TIMESTAMP AS OF <expression>`.
-4. Minimal frontend: Catalog Explorer, SQL Editor, results grid.
+4. ✅ Minimal frontend: Catalog Explorer, SQL Editor, results grid, Query History.
+   - `frontend/`: Vite + React 18 + TypeScript, Monaco bundled locally (no CDN), React Query, hash routing.
+   - Dev: `npm run dev` in `frontend/` (port 5173) proxies `/api` to the FastAPI server on port 8000.
+   - Build: `npm run build` writes `frontend/dist`; `python -m drb_emu` then serves the UI at http://127.0.0.1:8000/.
+   - Extra backend endpoints for the UI: `GET /api/drb/session`, `GET /api/drb/catalog-tree`.
 5. Spark DataFrame API and opt-in `pyspark` import hook.
 6. Dashboards.
 7. Grant enforcement and lineage UI.

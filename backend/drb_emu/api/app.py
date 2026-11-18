@@ -4,7 +4,9 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from drb_emu.api import query_history_router, statements_router, tables_router, unity_catalog_router
+from fastapi.staticfiles import StaticFiles
+
+from drb_emu.api import query_history_router, statements_router, tables_router, unity_catalog_router, workspace_router
 from drb_emu.api.statement_result_formatter import StatementResultFormatter
 from drb_emu.errors import DrbError, InvalidParameterValue, ResourceAlreadyExists, ResourceNotEmpty, ResourceNotFound, UnsupportedStatement
 from drb_emu.lake import LakePathError
@@ -33,6 +35,7 @@ def create_app(lake_root: Path, metastore_path: Path) -> FastAPI:
     app.include_router(tables_router.router)
     app.include_router(unity_catalog_router.router)
     app.include_router(query_history_router.router)
+    app.include_router(workspace_router.router)
 
     @app.get("/health")
     def health() -> dict:
@@ -46,5 +49,9 @@ def create_app(lake_root: Path, metastore_path: Path) -> FastAPI:
     def drb_error(_: Request, error: DrbError) -> JSONResponse:
         status_code = next((status for error_type, status in error_statuses if isinstance(error, error_type)), 500)
         return JSONResponse(status_code=status_code, content={"error_code": error.error_code, "message": error.message})
+
+    frontend_build = Path(__file__).resolve().parents[3] / "frontend" / "dist"
+    if (frontend_build / "index.html").is_file():
+        app.mount("/", StaticFiles(directory=frontend_build, html=True), name="frontend")
 
     return app
