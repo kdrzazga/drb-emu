@@ -114,6 +114,8 @@ drb-emu/
    - Dev: `npm run dev` in `frontend/` (port 5173) proxies `/api` to the FastAPI server on port 8000.
    - Build: `npm run build` writes `frontend/dist`; `python -m drb_emu` then serves the UI at http://127.0.0.1:8000/.
    - Extra backend endpoints for the UI: `GET /api/drb/session`, `GET /api/drb/catalog-tree`.
+   - Demo data: `python -m drb_emu.seed [people] [trades] [computer_store] [--replace]` creates three catalogs with
+     deterministic generated data (50–2000 rows per table, small dictionary tables excepted) and a few views each.
 5. Spark DataFrame API and opt-in `pyspark` import hook.
 6. Dashboards.
 7. Grant enforcement and lineage UI.
