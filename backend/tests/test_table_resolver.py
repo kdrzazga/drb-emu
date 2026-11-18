@@ -1,3 +1,6 @@
+import time
+from datetime import datetime, timezone
+
 import pyarrow as pa
 import pytest
 
@@ -109,9 +112,20 @@ def test_version_as_of_reads_older_snapshot(sales_workspace: Workspace, orders: 
     assert rows == [{"now": 6, "first": 3}]
 
 
-def test_timestamp_as_of_is_not_supported_yet(sales_workspace: Workspace):
+def test_timestamp_as_of_reads_snapshot_at_that_time(sales_workspace: Workspace, orders: pa.Table):
+    first_commit = sales_workspace.delta_store.history(sales_workspace.catalog_service.get_table("main.sales.orders").storage_location)[0]
+    first_commit_time = datetime.fromtimestamp(first_commit["timestamp"] / 1000, tz=timezone.utc)
+    time.sleep(0.05)
+    sales_workspace.catalog_service.write_table("main.sales.orders", orders, "append")
+
+    rows = query(sales_workspace, f"SELECT COUNT(*) AS n FROM main.sales.orders TIMESTAMP AS OF '{first_commit_time.isoformat()}'")
+
+    assert rows == [{"n": 3}]
+
+
+def test_timestamp_expression_in_time_travel_is_unsupported(sales_workspace: Workspace):
     with pytest.raises(UnsupportedStatement):
-        query(sales_workspace, "SELECT * FROM main.sales.orders TIMESTAMP AS OF '2026-01-01'")
+        query(sales_workspace, "SELECT * FROM main.sales.orders TIMESTAMP AS OF current_timestamp()")
 
 
 def test_missing_table_is_reported(sales_workspace: Workspace):
@@ -125,9 +139,9 @@ def test_table_functions_are_left_alone(sales_workspace: Workspace):
     assert query(sales_workspace, "SELECT COUNT(*) AS n FROM range(4)") == [{"n": 4}]
 
 
-def test_non_query_statement_is_unsupported(sales_workspace: Workspace):
+def test_unsupported_statement_is_reported(sales_workspace: Workspace):
     with pytest.raises(UnsupportedStatement):
-        query(sales_workspace, "DROP TABLE main.sales.orders")
+        query(sales_workspace, "ALTER TABLE main.sales.orders ADD COLUMN note STRING")
 
 
 def test_syntax_error_is_reported(sales_workspace: Workspace):

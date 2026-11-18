@@ -94,25 +94,53 @@ class UnityCatalogService:
             metastore.delete(schema)
         self._remove_managed_data(managed_locations)
 
-    def write_table(self, full_name: str, data: pa.Table, mode: str, partition_by: tuple[str, ...] = ()) -> TableInfo:
+    def write_table(self, full_name: str, data: pa.Table, mode: str, partition_by: tuple[str, ...] = (), operation: str | None = None) -> TableInfo:
         table_name = TableName.parse(full_name)
         with self.session_factory.begin() as metastore:
             schema = self._require_schema(metastore, table_name.schema_name)
             table = self._find_table(metastore, table_name)
             if table is None:
-                table_id = self._new_id()
-                location = self.path_resolver.managed_table_location(table_name.catalog, table_name.schema, table_id)
-                self.delta_store.write(location, data, mode, partition_by)
-                table = self._new_table_record(table_id, table_name.table, "MANAGED", location, None, None)
+                table = self._new_managed_table(table_name, data, partition_by, None, operation)
                 schema.tables.append(table)
             elif table.table_type == "VIEW":
                 raise InvalidParameterValue("EXPECT_TABLE_NOT_VIEW", f"{table_name.quoted} is a view and cannot be written to")
             else:
-                self.delta_store.write(table.storage_location, data, mode, partition_by)
+                self.delta_store.write(table.storage_location, data, mode, partition_by, operation)
                 table.updated_at = self._now()
             self._refresh_columns(table)
             metastore.flush()
             return self._table_info(table)
+
+    def create_managed_table(self, full_name: str, data: pa.Table, partition_by: tuple[str, ...] = (), comment: str | None = None) -> TableInfo:
+        table_name = TableName.parse(full_name)
+        with self.session_factory.begin() as metastore:
+            schema = self._require_absent_table(metastore, table_name)
+            table = self._new_managed_table(table_name, data, partition_by, comment, "CREATE TABLE")
+            schema.tables.append(table)
+            self._refresh_columns(table)
+            metastore.flush()
+            return self._table_info(table)
+
+    def set_comment(self, object_kind: str, full_name: str, comment: str | None):
+        with self.session_factory.begin() as metastore:
+            if object_kind == "CATALOG":
+                commented = self._require_catalog(metastore, normalize_name(full_name))
+            elif object_kind == "SCHEMA":
+                commented = self._require_schema(metastore, SchemaName.parse(full_name))
+            else:
+                table_name = TableName.parse(full_name)
+                commented = self._find_table(metastore, table_name)
+                if commented is None:
+                    raise ResourceNotFound("TABLE_OR_VIEW_NOT_FOUND", f"The table or view {table_name.quoted} cannot be found")
+            commented.comment = comment
+            commented.updated_at = self._now()
+
+    def touch_table(self, full_name: str):
+        with self.session_factory.begin() as metastore:
+            table = self._find_table(metastore, TableName.parse(full_name))
+            if table is not None and table.table_type != "VIEW":
+                table.updated_at = self._now()
+                self._refresh_columns(table)
 
     def create_external_table(self, full_name: str, storage_location: str, comment: str | None = None) -> TableInfo:
         table_name = TableName.parse(full_name)
@@ -198,6 +226,13 @@ class UnityCatalogService:
         if self._find_table(metastore, table_name) is not None:
             raise ResourceAlreadyExists("TABLE_OR_VIEW_ALREADY_EXISTS", f"The table or view {table_name.quoted} already exists")
         return schema
+
+    def _new_managed_table(self, table_name: TableName, data: pa.Table, partition_by: tuple[str, ...], comment: str | None,
+                           operation: str | None) -> TableRecord:
+        table_id = self._new_id()
+        location = self.path_resolver.managed_table_location(table_name.catalog, table_name.schema, table_id)
+        self.delta_store.write(location, data, "error", partition_by, operation)
+        return self._new_table_record(table_id, table_name.table, "MANAGED", location, None, comment)
 
     def _new_schema_record(self, name: str, comment: str | None) -> SchemaRecord:
         now = self._now()

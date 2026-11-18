@@ -102,9 +102,13 @@ drb-emu/
 
 ## Build order
 
-1. Lake path resolver, Delta I/O and DuckDB sessions.
-2. UC metastore and Resolver: three-level names, managed tables, `SELECT`.
-3. SQL router: catalog commands, DML through delta-rs, `MERGE`, time travel, query history.
+1. ✅ Lake path resolver, Delta I/O and DuckDB sessions, plus a minimal FastAPI server.
+2. ✅ UC metastore and Resolver: three-level names, managed tables, `SELECT`.
+3. ✅ SQL router: catalog commands, DML through delta-rs, `MERGE`, time travel, query history.
+   - Statements sqlglot cannot parse (`CREATE/DROP CATALOG`, `SHOW ...`, `COMMENT ON CATALOG`, `DESCRIBE DETAIL`, `RESTORE`, `OPTIMIZE`, `VACUUM`) are matched by regex first.
+   - `INSERT` runs against an empty DuckDB scratch copy of the target and appends; `UPDATE`/`DELETE`/`MERGE` run against a full scratch copy and overwrite the Delta table. Each commit is tagged `drb.operation` so `DESCRIBE HISTORY` shows `UPDATE`, `DELETE`, `MERGE`.
+   - `UPDATE SET *` / `INSERT *` in `MERGE` are expanded by column name before DuckDB sees them.
+   - Not yet: `ALTER TABLE`, `SHOW VIEWS`, `information_schema`, column comments, `TIMESTAMP AS OF <expression>`.
 4. Minimal frontend: Catalog Explorer, SQL Editor, results grid.
 5. Spark DataFrame API and opt-in `pyspark` import hook.
 6. Dashboards.

@@ -143,7 +143,7 @@ def test_missing_table_error_code(client: TestClient):
 
 
 def test_unsupported_statement_fails_cleanly(client: TestClient):
-    body = run_statement(client, "CREATE TABLE t (id INT)")
+    body = run_statement(client, "ALTER TABLE main.default.t ADD COLUMN id INT")
 
     assert body["status"]["state"] == "FAILED"
     assert body["status"]["error"]["error_code"] == "UNSUPPORTED_STATEMENT"

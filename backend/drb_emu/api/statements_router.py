@@ -2,6 +2,7 @@ from typing import Any
 from uuid import uuid4
 
 import duckdb
+from deltalake.exceptions import DeltaError
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
@@ -26,11 +27,13 @@ def execute_statement(request: StatementRequest,
     statement_id = str(uuid4())
     try:
         with workspace.session_lock:
-            result = workspace.statement_executor.execute(request.statement, request.parameters)
+            result = workspace.statement_executor.execute(request.statement, request.parameters, statement_id)
     except DrbError as error:
         return failed_statement(statement_id, error.error_code, error.message)
     except duckdb.Error as error:
         return failed_statement(statement_id, type(error).__name__, str(error))
+    except (ValueError, DeltaError) as error:
+        return failed_statement(statement_id, "INVALID_PARAMETER_VALUE", str(error))
     return {"statement_id": statement_id, "status": {"state": "SUCCEEDED"}, **result_formatter.format(result, request.row_limit)}
 
 
