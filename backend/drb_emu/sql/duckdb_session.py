@@ -27,6 +27,9 @@ class DuckDBSession:
         self.connection.register(view_name, self.delta_store.dataset(location, version))
         self.registered_views.add(view_name)
 
+    def bind_catalog_table(self, internal_view_name: str, location: str | Path, version: int | None):
+        self.connection.register(internal_view_name, self.delta_store.dataset(location, version))
+
     def register_arrow(self, view_name: str, data: pa.Table):
         self.connection.register(view_name, data)
         self.registered_views.add(view_name)

@@ -16,6 +16,7 @@ class LakePathResolver:
         self.dbfs_folder = "dbfs"
         self.volumes_folder = "volumes"
         self.managed_folder = "__managed"
+        self.lake_scheme = "lake"
         self.volumes_prefix = "/Volumes/"
         self.dbfs_fuse_prefix = "/dbfs/"
 
@@ -28,6 +29,8 @@ class LakePathResolver:
             return self._inside_lake(self.dbfs_folder, location.removeprefix(self.dbfs_fuse_prefix))
         uri_parts = urlsplit(location)
         scheme = uri_parts.scheme.lower()
+        if scheme == self.lake_scheme:
+            return self._inside_lake(uri_parts.netloc, uri_parts.path)
         if scheme == "dbfs" and uri_parts.path.startswith(self.volumes_prefix):
             return self._inside_lake(self.volumes_folder, uri_parts.path.removeprefix(self.volumes_prefix))
         if scheme == "dbfs":
@@ -38,8 +41,8 @@ class LakePathResolver:
             return self._resolve_azure_uri(uri_parts, location)
         raise LakePathError(f"Unsupported storage location: {location}")
 
-    def managed_table_location(self, catalog: str, schema: str, table_id: str) -> Path:
-        return self._inside_lake(self.managed_folder, catalog, schema, table_id)
+    def managed_table_location(self, catalog: str, schema: str, table_id: str) -> str:
+        return f"{self.lake_scheme}:/{self.managed_folder}/{catalog}/{schema}/{table_id}"
 
     def volume_location(self, catalog: str, schema: str, volume: str) -> Path:
         return self._inside_lake(self.volumes_folder, catalog, schema, volume)

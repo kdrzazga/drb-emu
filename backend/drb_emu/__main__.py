@@ -8,8 +8,9 @@ from drb_emu.api import create_app
 
 def main():
     lake_root = Path(os.environ.get("DRB_EMU_LAKE", "lake"))
+    metastore_path = Path(os.environ.get("DRB_EMU_METASTORE", "metastore/metastore.db"))
     port = int(os.environ.get("DRB_EMU_PORT", "8000"))
-    uvicorn.run(create_app(lake_root), host="127.0.0.1", port=port)
+    uvicorn.run(create_app(lake_root, metastore_path), host="127.0.0.1", port=port)
 
 
 if __name__ == "__main__":

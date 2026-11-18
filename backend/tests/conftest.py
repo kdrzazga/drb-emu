@@ -5,6 +5,7 @@ import pytest
 
 from drb_emu.lake import DeltaTableStore, LakePathResolver
 from drb_emu.sql import DuckDBSession
+from drb_emu.workspace import Workspace
 
 
 @pytest.fixture
@@ -28,6 +29,13 @@ def delta_store(path_resolver: LakePathResolver) -> DeltaTableStore:
 def session(delta_store: DeltaTableStore):
     with DuckDBSession(delta_store) as duckdb_session:
         yield duckdb_session
+
+
+@pytest.fixture
+def workspace(tmp_path: Path):
+    drb_workspace = Workspace(tmp_path / "lake", tmp_path / "metastore" / "metastore.db")
+    yield drb_workspace
+    drb_workspace.close()
 
 
 @pytest.fixture

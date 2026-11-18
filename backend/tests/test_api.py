@@ -10,7 +10,7 @@ ORDERS_STATEMENT = "SELECT * FROM (VALUES (1, 10.0, 'PL'), (2, 20.5, 'DE'), (3, 
 
 @pytest.fixture
 def client(tmp_path: Path):
-    with TestClient(create_app(tmp_path / "lake")) as test_client:
+    with TestClient(create_app(tmp_path / "lake", tmp_path / "metastore" / "metastore.db")) as test_client:
         yield test_client
 
 

@@ -46,7 +46,14 @@ def test_rejects_path_outside_lake(path_resolver: LakePathResolver, tmp_path: Pa
 
 def test_managed_table_location_is_under_managed_folder(path_resolver: LakePathResolver):
     location = path_resolver.managed_table_location("main", "sales", "a1b2c3")
-    assert location == path_resolver.lake_root / "__managed" / "main" / "sales" / "a1b2c3"
+
+    assert location == "lake:/__managed/main/sales/a1b2c3"
+    assert path_resolver.resolve(location) == path_resolver.lake_root / "__managed" / "main" / "sales" / "a1b2c3"
+
+
+def test_lake_uri_rejects_escape(path_resolver: LakePathResolver):
+    with pytest.raises(LakePathError):
+        path_resolver.resolve("lake:/../outside")
 
 
 def test_volume_location_matches_volumes_uri(path_resolver: LakePathResolver):
