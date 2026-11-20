@@ -6,6 +6,7 @@ uvicorn>=0.38
 sqlglot>=30
 sqlalchemy>=2.0
 tzdata>=2025.2
+pygame-ce>=2.5
 pytest>=8.4
 httpx>=0.28
 -e .

@@ -1,0 +1,120 @@
+1
+00:00:00,056 --> 00:00:04,861
+Lakehouse is A data architecture that combines the cheap, flexible storage of a
+
+2
+00:00:04,861 --> 00:00:09,847
+data lake with the reliability and performance of a data warehouse.
+
+3
+00:00:09,847 --> 00:00:16,083
+All your data sits in one place and can be used for both BI/SQL and AI/ML
+
+4
+00:00:16,083 --> 00:00:17,861
+workloads.
+
+5
+00:00:17,861 --> 00:00:23,694
+Lakehouse can be depickted as a library with books Cloud storage is The object
+
+6
+00:00:23,694 --> 00:00:29,833
+storage where the data files physically live, such as AWS S3, Azure Data Lake
+
+7
+00:00:29,833 --> 00:00:34,361
+Storage (ADLS) or Google Cloud Storage.
+
+8
+00:00:34,361 --> 00:00:37,569
+Databricks doesn’t own this storage.
+
+9
+00:00:37,569 --> 00:00:41,291
+It reads and writes files in your cloud account.
+
+10
+00:00:41,291 --> 00:00:45,417
+Cloud storage can be presented as shelves with books.
+
+11
+00:00:45,417 --> 00:00:51,889
+The shelves are rented from a cloud provider (AWS, Azure, GCP) and aren’t part of
+
+12
+00:00:51,889 --> 00:00:54,069
+Databricks itself.
+
+13
+00:00:54,069 --> 00:00:59,597
+Delta Lake format is An open table format that stores data as Parquet files plus a
+
+14
+00:00:59,597 --> 00:01:03,958
+transaction log (_delta_log).
+
+15
+00:01:03,958 --> 00:01:09,708
+The log adds ACID transactions, schema enforcement, versioning (“time travel”) and
+
+16
+00:01:09,708 --> 00:01:14,486
+safe updates, deletes and merges on top of plain files.
+
+17
+00:01:14,486 --> 00:01:19,278
+Each library book is a table and Delta Lake is the way it’s written.
+
+18
+00:01:19,278 --> 00:01:24,902
+A Delta “book” also has a change history at the back (the transaction log).
+
+19
+00:01:24,902 --> 00:01:29,093
+That’s what makes time travel and safe edits possible.
+
+20
+00:01:29,149 --> 00:01:35,482
+Unity Catalog is Databricks’ central governance layer for data and AI assets.
+
+21
+00:01:35,482 --> 00:01:40,579
+It keeps the metadata (catalog, then schema , then table).
+
+22
+00:01:40,579 --> 00:01:45,593
+it controls who can access what, and records lineage and audit logs across
+
+23
+00:01:45,593 --> 00:01:47,538
+workspaces.
+
+24
+00:01:47,538 --> 00:01:52,454
+Unity Catalog can be depicted as a computer system with a librarian: and it’s a
+
+25
+00:01:52,454 --> 00:01:55,496
+little more than a catalog of books.
+
+26
+00:01:55,496 --> 00:02:00,634
+The librarian also decides who may borrow which book (permissions), keeps a record
+
+27
+00:02:00,634 --> 00:02:06,149
+of who read what (auditing) and tracks where books came from (lineage).
+
+28
+00:02:06,149 --> 00:02:10,510
+The people who come to read and work with the books are the Databricks compute (
+
+29
+00:02:10,510 --> 00:02:13,593
+clusters and SQL warehouses).
+
+30
+00:02:13,593 --> 00:02:18,240
+The library stays the same no matter how many readers come in.
+

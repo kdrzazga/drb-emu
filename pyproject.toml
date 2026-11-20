@@ -16,6 +16,7 @@ dependencies = [
     "sqlglot>=30",
     "sqlalchemy>=2.0",
     "tzdata>=2025.2",
+    "pygame-ce>=2.5",
 ]
 
 [project.optional-dependencies]
@@ -29,6 +30,9 @@ drb-emu = "drb_emu.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["backend"]
+
+[tool.setuptools.package-data]
+"drb_emu.education" = ["*.png", "*.mp3", "*.srt"]
 
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
