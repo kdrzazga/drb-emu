@@ -4,7 +4,6 @@ from pathlib import Path
 import uvicorn
 
 from drb_emu.api import create_app
-from drb_emu.education.lecture import LectureAnimation
 
 
 def main():
@@ -14,7 +13,6 @@ def main():
 
     print("UI avaialble at http://localhost:5173/")
 
-    LectureAnimation().run()
     uvicorn.run(create_app(lake_root, metastore_path), host="127.0.0.1", port=port)
 
 

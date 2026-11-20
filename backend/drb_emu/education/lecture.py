@@ -71,3 +71,7 @@ class LectureAnimation:
             FrameLabel(128_000, "CLUSTERS", [above_people_upper_line]),
             FrameLabel(128_000, "SQL WAREHOUSES", [above_people_lower_line]),
         ]
+
+
+if __name__ == "__main__":
+    LectureAnimation().run()

@@ -27,6 +27,7 @@ dev = [
 
 [project.scripts]
 drb-emu = "drb_emu.__main__:main"
+drb-emu-panel = "drb_emu.control_panel:main"
 
 [tool.setuptools.packages.find]
 where = ["backend"]
